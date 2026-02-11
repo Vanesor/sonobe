@@ -4,6 +4,7 @@ members = [
     "solidity-verifiers",
     "cli",
     "experimental-frontends",
+    "fl-zkp-bridge",
 ]
 resolver = "2"
 

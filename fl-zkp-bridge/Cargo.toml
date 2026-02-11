@@ -1,0 +1,35 @@
+[package]
+name = "fl-zkp-bridge"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "fl_zkp_bridge"
+crate-type = ["cdylib", "rlib"]
+
+[[example]]
+name = "addition_circuit"
+path = "examples/addition_circuit.rs"
+
+[[example]]
+name = "sequential_folding_pipeline"
+path = "examples/sequential_folding_pipeline.rs"
+
+[dependencies]
+folding-schemes = { path = "../folding-schemes" }
+pyo3 = { version = "0.20", features = ["extension-module", "abi3-py38"] }
+ark-bn254 = { workspace = true }
+ark-grumpkin = { workspace = true }
+ark-ff = { workspace = true }
+ark-ec = { workspace = true }
+ark-r1cs-std = { workspace = true }
+ark-relations = { workspace = true }
+ark-serialize = { workspace = true }
+ark-std = { workspace = true }
+ark-crypto-primitives = { workspace = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+
+[build-dependencies]
+pyo3-build-config = "0.20"

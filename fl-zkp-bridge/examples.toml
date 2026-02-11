@@ -1,0 +1,4 @@
+[[example]]
+name = "addition_circuit"
+path = "examples/addition_circuit.rs"
+required-features = []
