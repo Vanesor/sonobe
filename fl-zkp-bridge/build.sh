@@ -19,7 +19,7 @@ maturin develop --release
 
 if [ $? -eq 0 ]; then
     echo ""
-    echo "✓ Build successful!"
+    echo ":) Build successful!"
     echo ""
     echo "You can now run the demo:"
     echo "  python examples/fl_demo.py"
@@ -29,6 +29,6 @@ if [ $? -eq 0 ]; then
     echo "  prover = fl_zkp_bridge.FLZKPProver()"
 else
     echo ""
-    echo "✗ Build failed!"
+    echo "x Build failed!"
     exit 1
 fi

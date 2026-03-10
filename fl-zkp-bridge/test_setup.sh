@@ -19,9 +19,9 @@ NC='\033[0m' # No Color
 echo -n "Checking Rust installation... "
 if command -v rustc &> /dev/null; then
     RUST_VERSION=$(rustc --version)
-    echo -e "${GREEN}✓${NC} Found: $RUST_VERSION"
+    echo -e "${GREEN}:)${NC} Found: $RUST_VERSION"
 else
-    echo -e "${RED}✗${NC} Rust not found!"
+    echo -e "${RED}x${NC} Rust not found!"
     echo "  Install from: https://rustup.rs/"
     exit 1
 fi
@@ -30,9 +30,9 @@ fi
 echo -n "Checking Cargo... "
 if command -v cargo &> /dev/null; then
     CARGO_VERSION=$(cargo --version)
-    echo -e "${GREEN}✓${NC} Found: $CARGO_VERSION"
+    echo -e "${GREEN}:)${NC} Found: $CARGO_VERSION"
 else
-    echo -e "${RED}✗${NC} Cargo not found!"
+    echo -e "${RED}x${NC} Cargo not found!"
     exit 1
 fi
 
@@ -40,9 +40,9 @@ fi
 echo -n "Checking Python installation... "
 if command -v python3 &> /dev/null; then
     PYTHON_VERSION=$(python3 --version)
-    echo -e "${GREEN}✓${NC} Found: $PYTHON_VERSION"
+    echo -e "${GREEN}:)${NC} Found: $PYTHON_VERSION"
 else
-    echo -e "${RED}✗${NC} Python3 not found!"
+    echo -e "${RED}x${NC} Python3 not found!"
     echo "  Install Python 3.8 or higher"
     exit 1
 fi
@@ -50,13 +50,13 @@ fi
 # Check pip
 echo -n "Checking pip... "
 if command -v pip3 &> /dev/null; then
-    echo -e "${GREEN}✓${NC} Found"
+    echo -e "${GREEN}:)${NC} Found"
 else
     echo -e "${YELLOW}⚠${NC} pip3 not found, trying pip..."
     if command -v pip &> /dev/null; then
-        echo -e "${GREEN}✓${NC} Found pip"
+        echo -e "${GREEN}:)${NC} Found pip"
     else
-        echo -e "${RED}✗${NC} pip not found!"
+        echo -e "${RED}x${NC} pip not found!"
         exit 1
     fi
 fi
@@ -65,9 +65,9 @@ fi
 echo ""
 echo -n "Checking directory structure... "
 if [ -f "Cargo.toml" ] && [ -f "src/lib.rs" ]; then
-    echo -e "${GREEN}✓${NC} In fl-zkp-bridge directory"
+    echo -e "${GREEN}:)${NC} In fl-zkp-bridge directory"
 else
-    echo -e "${RED}✗${NC} Not in fl-zkp-bridge directory!"
+    echo -e "${RED}x${NC} Not in fl-zkp-bridge directory!"
     echo "  Please run from: sonobe/fl-zkp-bridge/"
     exit 1
 fi
@@ -77,16 +77,16 @@ echo ""
 echo -n "Checking maturin installation... "
 if command -v maturin &> /dev/null; then
     MATURIN_VERSION=$(maturin --version)
-    echo -e "${GREEN}✓${NC} Found: $MATURIN_VERSION"
+    echo -e "${GREEN}:)${NC} Found: $MATURIN_VERSION"
 else
     echo -e "${YELLOW}⚠${NC} Maturin not found"
     echo "  Installing maturin..."
     pip3 install maturin || pip install maturin
     
     if command -v maturin &> /dev/null; then
-        echo -e "${GREEN}✓${NC} Maturin installed successfully"
+        echo -e "${GREEN}:)${NC} Maturin installed successfully"
     else
-        echo -e "${RED}✗${NC} Failed to install maturin"
+        echo -e "${RED}x${NC} Failed to install maturin"
         exit 1
     fi
 fi
@@ -96,9 +96,9 @@ echo ""
 echo "Testing Rust compilation..."
 echo -n "  Building Rust example... "
 if cargo build --example addition_circuit --release &> /tmp/fl_zkp_build.log; then
-    echo -e "${GREEN}✓${NC} Build successful"
+    echo -e "${GREEN}:)${NC} Build successful"
 else
-    echo -e "${RED}✗${NC} Build failed"
+    echo -e "${RED}x${NC} Build failed"
     echo "  Check log: /tmp/fl_zkp_build.log"
     exit 1
 fi
@@ -108,9 +108,9 @@ echo ""
 echo "Building Python module..."
 echo -n "  Running maturin develop... "
 if maturin develop --release &> /tmp/fl_zkp_maturin.log; then
-    echo -e "${GREEN}✓${NC} Build successful"
+    echo -e "${GREEN}:)${NC} Build successful"
 else
-    echo -e "${RED}✗${NC} Build failed"
+    echo -e "${RED}x${NC} Build failed"
     echo "  Check log: /tmp/fl_zkp_maturin.log"
     exit 1
 fi
@@ -119,9 +119,9 @@ fi
 echo ""
 echo -n "Testing Python import... "
 if python3 -c "import fl_zkp_bridge; print('Success')" &> /dev/null; then
-    echo -e "${GREEN}✓${NC} Module imports correctly"
+    echo -e "${GREEN}:)${NC} Module imports correctly"
 else
-    echo -e "${RED}✗${NC} Import failed"
+    echo -e "${RED}x${NC} Import failed"
     echo "  Try: maturin develop --release"
     exit 1
 fi
