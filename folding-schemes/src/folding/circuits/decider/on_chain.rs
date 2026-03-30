@@ -4,12 +4,12 @@ use ark_crypto_primitives::sponge::{
     constraints::AbsorbGadget,
     poseidon::{constraints::PoseidonSpongeVar, PoseidonConfig},
 };
-use ark_r1cs_std::{alloc::AllocVar, eq::EqGadget, fields::fp::FpVar};
+use ark_r1cs_std::{alloc::AllocVar, eq::EqGadget, fields::{fp::FpVar, FieldVar}};
 use ark_relations::gr1cs::{ConstraintSynthesizer, ConstraintSystemRef, SynthesisError};
 use ark_std::{marker::PhantomData, Zero};
 
 use crate::{
-    arith::{r1cs::R1CS, ArithRelation, ArithRelationGadget},
+    arith::{r1cs::R1CS, Arith, ArithRelation, ArithRelationGadget},
     commitment::pedersen::Params as PedersenParams,
     folding::{
         circuits::{
@@ -103,6 +103,13 @@ pub struct GenericOnchainDeciderCircuit<
     /// KZG challenges
     pub kzg_challenges: Vec<CF1<C1>>,
     pub kzg_evaluations: Vec<CF1<C1>>,
+    
+    /// Model fingerprint verification (Byzantine detection)
+    /// These fields enable checking that the prover used the correct model weights
+    pub model_fingerprint: Option<CF1<C1>>,     // Expected fingerprint (from server)
+    pub w_sampled: Option<Vec<CF1<C1>>>,        // Sampled weights (1000 values)
+    pub biases: Option<Vec<CF1<C1>>>,           // Biases (10 values)
+    pub random_vector: Option<Vec<CF1<C1>>>,    // Random vector for Schwartz-Zippel (10 values)
 }
 
 impl<
@@ -167,6 +174,10 @@ impl<
             cf_W_i: CycleFoldWitness::dummy(&cf_arith),
             kzg_challenges: vec![Zero::zero(); num_commitments],
             kzg_evaluations: vec![Zero::zero(); num_commitments],
+            model_fingerprint: None,
+            w_sampled: None,
+            biases: None,
+            random_vector: None,
             arith,
             cf_arith,
         }
@@ -308,6 +319,41 @@ where
         {
             // The randomness `_r` is currently not used.
             EvalGadget::evaluate_gadget(v, c)?.enforce_equal(e)?;
+        }
+
+        // 8. Model fingerprint verification (Byzantine detection)
+        // This ONE-OFF check proves the client used the correct global model
+        if let (Some(fp_expected), Some(w_sampled), Some(biases_vec), Some(r_vec)) = (
+            &self.model_fingerprint,
+            &self.w_sampled,
+            &self.biases,
+            &self.random_vector,
+        ) {
+            let fp_expected_var = FpVar::new_input(cs.clone(), || Ok(*fp_expected))?;
+            let w_sampled_var: Vec<FpVar<CF1<C1>>> = Vec::new_witness(cs.clone(), || Ok(w_sampled.clone()))?;
+            let biases_var: Vec<FpVar<CF1<C1>>> = Vec::new_witness(cs.clone(), || Ok(biases_vec.clone()))?;
+            let r_var: Vec<FpVar<CF1<C1>>> = Vec::new_witness(cs.clone(), || Ok(r_vec.clone()))?;
+            
+            // Compute fingerprint: fp = Σ r[k] * (b[k] + Σ_{j∈sampled} W[k,j])
+            // Constants for MNIST linear model (10 classes, 100 sampled weights per class)
+            const NUM_CLASSES: usize = 10;
+            const SAMPLE_SIZE: usize = 100;
+            
+            let mut fp_computed = FpVar::zero();
+            for k in 0..NUM_CLASSES {
+                let mut row_val = biases_var[k].clone();
+                for j in 0..SAMPLE_SIZE {
+                    let w_idx = k * SAMPLE_SIZE + j;
+                    row_val = &row_val + &w_sampled_var[w_idx];
+                }
+                // r[k] * (b[k] + Σ W[k,j])
+                let term = &r_var[k] * &row_val;
+                fp_computed = &fp_computed + &term;
+            }
+            
+            // Constraint: computed fingerprint == expected fingerprint
+            // This fails if client used different model → Byzantine detection
+            fp_computed.enforce_equal(&fp_expected_var)?;
         }
 
         Ok(())

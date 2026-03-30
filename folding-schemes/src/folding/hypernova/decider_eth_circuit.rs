@@ -164,6 +164,11 @@ impl<
             cf_W_i: hn.cf_W_i,
             kzg_challenges,
             kzg_evaluations,
+            // Fingerprint fields (None for HyperNova - not needed)
+            model_fingerprint: None,
+            w_sampled: None,
+            biases: None,
+            random_vector: None,
         })
     }
 }

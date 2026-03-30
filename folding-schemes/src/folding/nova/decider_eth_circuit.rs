@@ -148,6 +148,11 @@ impl<
             cf_W_i: nova.cf_W_i,
             kzg_challenges,
             kzg_evaluations,
+            // Fingerprint fields (None for Nova - not needed)
+            model_fingerprint: None,
+            w_sampled: None,
+            biases: None,
+            random_vector: None,
         })
     }
 }

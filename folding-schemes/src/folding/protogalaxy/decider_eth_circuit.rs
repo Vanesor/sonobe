@@ -77,6 +77,23 @@ pub type DeciderEthCircuit<C1, C2> = GenericOnchainDeciderCircuit<
     DeciderProtoGalaxyGadget,
 >;
 
+impl<C1: Curve, C2: Curve> DeciderEthCircuit<C1, C2> {
+    /// Set fingerprint verification data for Byzantine detection
+    pub fn with_fingerprint(
+        mut self,
+        fingerprint: CF1<C1>,
+        w_sampled: Vec<CF1<C1>>,
+        biases: Vec<CF1<C1>>,
+        random_vector: Vec<CF1<C1>>,
+    ) -> Self {
+        self.model_fingerprint = Some(fingerprint);
+        self.w_sampled = Some(w_sampled);
+        self.biases = Some(biases);
+        self.random_vector = Some(random_vector);
+        self
+    }
+}
+
 /// returns an instance of the DeciderEthCircuit from the given ProtoGalaxy struct
 impl<
         C1: Curve,
@@ -135,6 +152,12 @@ impl<
             cf_W_i: protogalaxy.cf_W_i,
             kzg_challenges,
             kzg_evaluations,
+            // Fingerprint fields will be populated from ProtoGalaxy state if available
+            // For now, set to None (will be updated in Phase 2)
+            model_fingerprint: None,
+            w_sampled: None,
+            biases: None,
+            random_vector: None,
         })
     }
 }
